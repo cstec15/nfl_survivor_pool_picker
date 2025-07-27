@@ -1,7 +1,7 @@
 # Ignore data and outputs
 data/
 anaconda_projects/db/
-
+personal_notes/
 
 .env
 .DS_Store
