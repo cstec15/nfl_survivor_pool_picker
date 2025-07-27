@@ -11,22 +11,46 @@ from scipy.optimize import linear_sum_assignment
 # Define various picker classes that utilize different strategies to pick each week
 
 class Picker:
-    """ 
-    All Pickers will inherit from this class. Defines basic functionality of a picker
-        and chooses a winner randomly each week
+    """
+    Base class for all picker strategies in a survivor pool.
+
+    This class implements the core logic for managing weekly picks,
+    tracking used teams, and evaluating performance. The default strategy
+    randomly picks an available team each week.
     """
 
     def __init__(self, season_df):
+        """
+        Initializes the Picker with the season's data.
+
+        Parameters:
+            season_df (pd.DataFrame): season data
+        """
         self.season_df = season_df
         self.weeks = sorted(np.unique(season_df['Week']))
         self.picked_teams = {}
         
 
     def make_pick_for_week(self, week_df):
+        """
+        Picks a team for the given week from available (not yet picked) teams.
+
+        Parameters:
+            week_df (pd.DataFrame): Data for a specific week.
+
+        Returns:
+            str: Chosen team's name.
+        """
         available_teams = self.get_available_teams_for_week(week_df)
         return random.choice(available_teams)
         
     def make_season_picks(self):
+        """
+        Makes picks for each week of the season using the picker strategy.
+
+        Returns:
+            dict: Mapping from week number to picked team.
+        """
         for w in self.weeks:
             week_df = self.season_df[self.season_df['Week'] == w]
             picked_team = self.make_pick_for_week(week_df)
@@ -34,11 +58,26 @@ class Picker:
         return self.picked_teams
         
     def get_available_teams_for_week(self, week_df):
+        """
+        Returns teams eligible to be picked (i.e., not picked in prior weeks).
+
+        Parameters:
+            week_df (pd.DataFrame): Data for a specific week.
+
+        Returns:
+            list: List of eligible team names.
+        """
         this_weeks_teams = week_df['Team']
         all_available_teams = [team for team in this_weeks_teams if team not in set(self.picked_teams.values())]
         return all_available_teams
         
     def evaluate_performance(self):
+        """
+        Evaluates how many weeks the picker survived without making a wrong pick.
+
+        Returns:
+            int: Number of weeks survived.
+        """
         if not self.picked_teams:
             print('Picks havent been made yet!')
             return 0
@@ -54,58 +93,75 @@ class Picker:
             return i - 1  # eliminated this week
         return len(self.picked_teams)  # survived all weeks
 
-    # def evaluate_performance(self):
-    #     num_weeks_survived = 0
-    #     if not self.picked_teams:
-    #         print('Picks havent been made yet!')
-    #         return
-    #     for week, picked_team in self.picked_teams.items():
-    #         team_week_df = self.season_df[(self.season_df['Week'] == week) & (self.season_df['Team'] == picked_team)]
-    #         if len(team_week_df[team_week_df['Won?'] == True]) > 0:
-    #             num_weeks_survived += 1
-    #             #print(f'Correctly picked the {picked_team} to win in Week {week}')
-    #         else:
-    #             #print(f'INCORRECTLY picked the {picked_team} to win in Week {week}')
-    #             #print(f'You survived {num_weeks_survived} weeks!')
-    #             break
-    #     return num_weeks_survived
-
 
 class BestOddsPicker(Picker):
     """
-    Picks the team with the best odds each week out of the remaining available weeks
+    Picker that selects the team with the best (lowest) odds to win each week.
     """
         
     def make_pick_for_week(self, week_df):
+        """
+        Picks the team with the lowest odds among the eligible teams.
+
+        Parameters:
+            week_df (pd.DataFrame): Data for a specific week.
+
+        Returns:
+            str: Chosen team's name.
+        """
         available_teams = self.get_available_teams_for_week(week_df)
         available_week_df = week_df[week_df['Team'].isin(available_teams)].sort_values(by='Odds', ascending=True)
         return available_week_df.iloc[0]['Team']
         
 class TopKOddsPicker(Picker):
     """
-    Randomly picks a team each week out of the remaining eligible teams with the top k best odds
+    Picker that randomly chooses from the top-k best-odds teams each week.
+
+    Parameters:
+        k (int): Number of top teams to randomly select from.
     """
     def __init__(self, season_df, k=3):
+        """
+        Initializes the picker with a specified 'k' value.
+
+        Parameters:
+            season_df (pd.DataFrame): Season data.
+            k (int): Number of top teams to consider each week.
+        """
         super().__init__(season_df)
         self.k = k
         
     def make_pick_for_week(self, week_df):
+        """
+        Randomly picks a team out of the team with the k lowest odds among the eligible teams.
+
+        Parameters:
+            week_df (pd.DataFrame): Data for a specific week.
+
+        Returns:
+            str: Chosen team's name.
+        """
         available_teams = self.get_available_teams_for_week(week_df)
         available_week_df = week_df[week_df['Team'].isin(available_teams)].sort_values(by='Odds', ascending=True)
         return available_week_df.iloc[random.randint(0, self.k-1)]['Team']
 
 class MaxOddsPicker(Picker):
     """
-    This picker will choose its picks based on what will give it the maximum possible odds
-    across all weeks
+    Picker that optimizes the entire season using the Hungarian algorithm to
+    maximize total implied win probability across all weeks.
     """
     
     def make_pick_for_week(self, week_df):
         print('This method is not applicable for this child class')
         
     def make_season_picks(self):
-        
-        # hungarian algorithm! https://en.wikipedia.org/wiki/Hungarian_algorithm
+        """
+        Uses the Hungarian algorithm to assign one team to each week to maximize
+        total implied probability.
+
+        Returns:
+            dict: Mapping from week number to picked team.
+        """
         
         def hungarian_algorithm(season_df):
             # Pivot Teams x Weeks matrix of probabilities
@@ -134,10 +190,19 @@ class MaxOddsPicker(Picker):
         
 class MaxOddsWithDecayPicker(Picker):
     """
-    This picker will choose its picks based on what will give it the maximum possible odds
-    across all weeks, but favoring earlier weeks by decaying odds the further in the future they are
+    Like MaxOddsPicker, but applies a decay factor to prioritize earlier wins.
+
+    Parameters:
+        decay_factor (float): Multiplier <1 to reduce weight of later weeks.
     """
     def __init__(self, season_df, decay_factor=0.25):
+        """
+        Initializes the picker with a decay factor.
+
+        Parameters:
+            season_df (pd.DataFrame): Season data.
+            decay_factor (float): Week weighting decay factor.
+        """
         super().__init__(season_df)
         self.decay_factor = decay_factor
         
@@ -145,7 +210,13 @@ class MaxOddsWithDecayPicker(Picker):
         print('This method is not applicable for this child class')
         
     def make_season_picks(self):
-        
+        """
+        Uses the Hungarian algorithm to assign one team to each week to maximize
+        total implied probability (with decay factor applied).
+
+        Returns:
+            dict: Mapping from week number to picked team.
+        """
         # hungarian algorithm! https://en.wikipedia.org/wiki/Hungarian_algorithm
         
         def hungarian_algorithm(season_df, decay_factor):
@@ -180,11 +251,23 @@ class MaxOddsWithDecayPicker(Picker):
 
 class SlidingWindowPicker(Picker):
     """
-    Picks teams using a sliding window Hungarian algorithm.
-    At each week, considers a window of future weeks (default 3)
-    and selects the team assigned to the current week in that window.
+    Applies a sliding window strategy using the Hungarian algorithm.
+    At each week, it considers a window of future weeks and assigns teams 
+    to maximize win probability with decay over the window.
+
+    Parameters:
+        decay_factor (float): Weighting factor for later weeks in each window.
+        window_size (int): Number of weeks to include in the sliding window.
     """
     def __init__(self, season_df, decay_factor=0.75, window_size=5):
+        """
+        Initializes the picker with sliding window parameters.
+
+        Parameters:
+            season_df (pd.DataFrame): Season data.
+            decay_factor (float): Multiplier for decaying future week importance.
+            window_size (int): Number of weeks to consider ahead.
+        """
         super().__init__(season_df)
         self.window_size = window_size
         self.decay_factor = decay_factor
@@ -228,9 +311,6 @@ class SlidingWindowPicker(Picker):
 
         self.picked_teams = week_to_team
         return week_to_team
-
-
-# FUTURE: Reinforcement learning to find best strategy?
 
 # In[ ]:
 

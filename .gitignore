@@ -1,6 +1,9 @@
 # Ignore data and outputs
 data/
+anaconda_projects/db/
 
+
+.env
 .DS_Store
 *.pyc
 __pycache__/
