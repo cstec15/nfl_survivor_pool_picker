@@ -1,0 +1,7 @@
+,Picker,Average Number of Weeks Survived
+0,Picker,0.754
+1,BestOddsPicker,4.132
+2,TopKOddsPicker,3.395
+3,MaxOddsPicker,3.789
+4,MaxOddsWithDecayPicker,3.798
+5,SlidingWindowPicker,4.351
