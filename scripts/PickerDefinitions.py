@@ -120,7 +120,7 @@ class TopKOddsPicker(Picker):
     Parameters:
         k (int): Number of top teams to randomly select from.
     """
-    def __init__(self, season_df, k=3):
+    def __init__(self, season_df, k=2):
         """
         Initializes the picker with a specified 'k' value.
 
@@ -195,7 +195,7 @@ class MaxOddsWithDecayPicker(Picker):
     Parameters:
         decay_factor (float): Multiplier <1 to reduce weight of later weeks.
     """
-    def __init__(self, season_df, decay_factor=0.25):
+    def __init__(self, season_df, decay_factor=0.8):
         """
         Initializes the picker with a decay factor.
 
@@ -259,7 +259,7 @@ class SlidingWindowPicker(Picker):
         decay_factor (float): Weighting factor for later weeks in each window.
         window_size (int): Number of weeks to include in the sliding window.
     """
-    def __init__(self, season_df, decay_factor=0.75, window_size=5):
+    def __init__(self, season_df, decay_factor=0.95, window_size=4):
         """
         Initializes the picker with sliding window parameters.
 
