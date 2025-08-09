@@ -85,8 +85,8 @@ nfl_survivor_pool_picker/
 
 ```bash
 # 1. Clone the repo
-git clone https://github.com/yourusername/nfl-survivor-pool.git
-cd nfl-survivor-pool
+git clone https://github.com/cstec15/nfl_survivor_pool_picker.git
+cd nfl_survivor_pool_picker
 
 # 2. Ensure that datasources are ingested from above resources
 
