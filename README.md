@@ -68,7 +68,15 @@ nfl_survivor_pool_picker/
 
 ## 📈 Final Results: Average Weeks Survived
 
-coming soon...
+| Picker                  | Average Number of Weeks Survived |
+|-------------------------|----------------------------------|
+| SlidingWindowPicker     | 4.477                            |
+| BestOddsPicker          | 4.373                            |
+| MaxOddsPicker           | 4.358                            |
+| MaxOddsWithDecayPicker  | 4.355                            |
+| TopKOddsPicker          | 3.481                            |
+| Picker                  | 1.005                            |
+
 
 
 ## 🚀 Running the Streamlit App
