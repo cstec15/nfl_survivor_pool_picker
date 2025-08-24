@@ -1,13 +1,13 @@
-# NFL Survivor Pool Picking Strategy Tester and Optimizer 🏈
+# NFL Survivor Pool Picking Strategy Tester and Optimizer
 An interactive data science tool to simulate and identify optimal picking strategies in NFL Survivor Pools using historical and simulated betting data.
 
 
-## 🎯 Goal
+## Goal
 
 This project aims to explore and identify the best picking strategies for NFL Survivor Pools. By simulating thousands of seasons using real historical data and bookmaker odds, the project evaluates different picking algorithms to determine which offers the highest average weeks survived and expected value in competitive pool settings.
 
 
-## 📊 Data Sources
+## Data Sources
 
 - **Historical NFL Odds and Results**: Collected from [Australia Sports Betting](https://www.aussportsbetting.com/data/historical-nfl-results-and-odds-data/)
 - **NFL Schedules (Historical and Upcoming)**: Collected from [Pro Football Reference](https://www.pro-football-reference.com/years/2024/games.htm)
@@ -16,7 +16,7 @@ This project aims to explore and identify the best picking strategies for NFL Su
 Datasets are not in this repo due to size. Vist the above sites to ingest data
 
 
-## 🗂️ Project Structure
+## Project Structure
 ```plaintext
 nfl_survivor_pool_picker/
 │
@@ -51,7 +51,7 @@ nfl_survivor_pool_picker/
 ```
 
 
-## 🔍 Strategy Formulation Process
+## Strategy Formulation Process
 
 1. **Two Goals**: Maximize number of weeks survived and maximize winnings when playing against various strategies in a Survivor Pool.
 2. **Picker Classes**:
@@ -66,7 +66,7 @@ nfl_survivor_pool_picker/
     - Pickers are measured on how many weeks they survive on average across thousands of simulations 
     - Pickers are also evaluated against one another on simulations based on their expected proportion of the pot they expect to win
 
-## 📈 Final Results: Average Weeks Survived
+## Final Results: Average Weeks Survived
 
 | Picker                  | Average Number of Weeks Survived |
 |-------------------------|----------------------------------|
@@ -79,7 +79,7 @@ nfl_survivor_pool_picker/
 
 
 
-## 🚀 Running the Streamlit App
+## Running the Streamlit App
 
 ### Setup Instructions
 
@@ -102,7 +102,7 @@ streamlit run streamlit_app/StreamlitApp.py
 4. Add more picking strategies
 
 
-## 👤 Author
+## Author
 
 **Christian Stec**  
 Data Scientist  
